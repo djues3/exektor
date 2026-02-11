@@ -18,7 +18,7 @@ interface Executor {
      *
      * @param executionId Unique identifier for this execution
      * @param script The command/script to execute
-     * @param cpuCount Number of CPUs to allocate
+     * @param cpus Number of CPUs to allocate (fractional values allowed, e.g., 0.5 for half a CPU)
      * @param memoryMb Memory in megabytes to allocate
      * @return ExecutionResult containing exit code, stdout, and stderr
      * @throws Exception if execution fails
@@ -26,7 +26,7 @@ interface Executor {
     suspend fun execute(
         executionId: String,
         script: String,
-        cpuCount: Int,
+        cpus: Double,
         memoryMb: Int
     ): ExecutionResult
 }

@@ -16,12 +16,12 @@ class ExecutionService(
     private val logger = LoggerFactory.getLogger(ExecutionService::class.java)
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    suspend fun createExecution(script: String, cpuCount: Int, memoryMb: Int): String {
-        val executionId = repository.create(script, cpuCount, memoryMb)
+    suspend fun createExecution(script: String, cpus: Double, memoryMb: Int): String {
+        val executionId = repository.create(script, cpus, memoryMb)
 
         coroutineScope.launch {
             try {
-                executeWithBackend(executionId, script, cpuCount, memoryMb)
+                executeWithBackend(executionId, script, cpus, memoryMb)
             } catch (e: Exception) {
                 logger.error("Execution $executionId failed with exception", e)
                 repository.update(
@@ -47,7 +47,7 @@ class ExecutionService(
     private suspend fun executeWithBackend(
         executionId: String,
         script: String,
-        cpuCount: Int,
+        cpuCount: Double,
         memoryMb: Int
     ) {
         logger.info("Starting execution $executionId with ${executor::class.simpleName}")

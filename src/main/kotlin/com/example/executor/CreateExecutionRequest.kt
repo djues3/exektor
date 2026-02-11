@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CreateExecutionRequest(
     val script: String,
-    val cpuCount: Int = 1,
+    val cpus: Double = 1.0,
     val memoryMb: Int = 512
 )

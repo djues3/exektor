@@ -20,12 +20,12 @@ data class ExecutionUpdate(
 )
 
 object ExecutionRepository {
-    suspend fun create(script: String, cpuCount: Int, memoryMb: Int): String = dbQuery {
+    suspend fun create(script: String, cpus: Double, memoryMb: Int): String = dbQuery {
         val id = UUID.randomUUID().toString()
         ExecutionsTable.insert {
             it[ExecutionsTable.id] = id
             it[ExecutionsTable.script] = script
-            it[ExecutionsTable.cpuCount] = cpuCount
+            it[ExecutionsTable.cpus] = cpus
             it[ExecutionsTable.memoryMb] = memoryMb
             it[ExecutionsTable.status] = ExecutionStatus.QUEUED
             it[createdAt] = Instant.now()
@@ -55,7 +55,7 @@ object ExecutionRepository {
     private fun ResultRow.toExecutionResponse() = ExecutionResponse(
         id = this[ExecutionsTable.id],
         script = this[ExecutionsTable.script],
-        cpuCount = this[ExecutionsTable.cpuCount],
+        cpuCount = this[ExecutionsTable.cpus],
         memoryMb = this[ExecutionsTable.memoryMb],
         status = this[ExecutionsTable.status],
         executorId = this[ExecutionsTable.executorId],

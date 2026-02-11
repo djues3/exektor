@@ -2,12 +2,10 @@ package com.example.executor
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.server.auth.authenticate
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 
 
@@ -21,14 +19,16 @@ fun Application.executorRoutes() {
             call.respondText("Exektor - Remote Command Execution Service")
         }
 
-        post("/executions") {
-            val request = call.receive<CreateExecutionRequest>()
-            val executionId = executionService.createExecution(
-                script = request.script,
-                cpuCount = request.cpuCount,
-                memoryMb = request.memoryMb
-            )
-            call.respond(HttpStatusCode.Created, CreateExecutionResponse(id = executionId))
+        authenticate {
+            post("/executions") {
+                val request = call.receive<CreateExecutionRequest>()
+                val executionId = executionService.createExecution(
+                    script = request.script,
+                    cpus = request.cpus,
+                    memoryMb = request.memoryMb
+                )
+                call.respond(HttpStatusCode.Created, CreateExecutionResponse(id = executionId))
+            }
         }
 
         get("/executions/{id}") {

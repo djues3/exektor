@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.javatime.timestamp
 object ExecutionsTable : Table("executions") {
     val id = varchar("id", 36)
     val script = text("script")
-    val cpuCount = integer("cpu_count")
+    val cpus = double("cpus")
     val memoryMb = integer("memory_mb")
     val status = enumerationByName("status", 20, ExecutionStatus::class)
     val executorId = varchar("executor_id", 255).nullable()

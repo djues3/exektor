@@ -1,14 +1,11 @@
 package com.example.executor
 
-import com.github.dockerjava.api.DockerClient
+import com.example.DockerClientProvider
 import com.github.dockerjava.api.async.ResultCallback
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.api.model.HostConfig
 import com.github.dockerjava.api.model.StreamType
 import com.github.dockerjava.api.model.WaitResponse
-import com.github.dockerjava.core.DefaultDockerClientConfig
-import com.github.dockerjava.core.DockerClientImpl
-import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -18,6 +15,8 @@ import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+
+const val BILLION: Double = 1_000_000_000.0
 /**
  * Executor implementation that runs commands in local Docker containers
  */
@@ -26,28 +25,24 @@ class DockerExecutor(
 ) : Executor {
 
     private val logger = LoggerFactory.getLogger(DockerExecutor::class.java)
-    private val dockerClient: DockerClient
-
-    init {
-        val config = DefaultDockerClientConfig.createDefaultConfigBuilder().build()
-        val httpClient = ApacheDockerHttpClient.Builder()
-            .dockerHost(config.dockerHost)
-            .sslConfig(config.sslConfig)
-            .build()
-        dockerClient = DockerClientImpl.getInstance(config, httpClient)
-    }
+    private val dockerClient = DockerClientProvider.client
 
     override suspend fun execute(
         executionId: String,
         script: String,
-        cpuCount: Int,
+        cpus: Double,
         memoryMb: Int
     ): ExecutionResult {
         logger.info("Starting execution $executionId")
 
+        // Some basic sandboxing
         val hostConfig = HostConfig.newHostConfig()
-            .withCpuCount(cpuCount.toLong())
+            .withNanoCPUs((cpus * BILLION).toLong())
             .withMemory((memoryMb * 1024 * 1024).toLong())
+            .withNetworkMode("none")
+            .withPidsLimit(256)
+            .withReadonlyRootfs(true)
+            .withSecurityOpts(listOf("no-new-privileges"))
 
         val container = withContext(Dispatchers.IO) {
             dockerClient.createContainerCmd(imageName)
@@ -55,6 +50,7 @@ class DockerExecutor(
                 .withHostConfig(hostConfig)
                 .withAttachStdout(true)
                 .withAttachStderr(true)
+                .withNetworkDisabled(true)
                 .exec()
         }
 
@@ -73,7 +69,6 @@ class DockerExecutor(
             logger.info(
                 "Container $containerId finished with exit code $exitCode"
             )
-
 
             return ExecutionResult(exitCode, stdout, stderr)
         } finally {
