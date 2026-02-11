@@ -20,8 +20,9 @@ data class ExecutionUpdate(
 )
 
 object ExecutionRepository {
-    suspend fun create(script: String, cpus: Double, memoryMb: Int): String = dbQuery {
-        val id = UUID.randomUUID().toString()
+
+    suspend fun create(script: String, cpus: Double, memoryMb: Int): UUID = dbQuery {
+        val id = UUID.randomUUID()
         ExecutionsTable.insert {
             it[ExecutionsTable.id] = id
             it[ExecutionsTable.script] = script
@@ -33,14 +34,18 @@ object ExecutionRepository {
         id
     }
 
-    suspend fun findById(id: String): ExecutionResponse? = dbQuery {
+    suspend fun findAll(): List<ExecutionResponse> {
+        return dbQuery { ExecutionsTable.selectAll().map { it.toExecutionResponse() } }
+    }
+
+    suspend fun findById(id: UUID): ExecutionResponse? = dbQuery {
         ExecutionsTable.selectAll()
             .where { ExecutionsTable.id eq id }
             .map { it.toExecutionResponse() }
             .singleOrNull()
     }
 
-    suspend fun update(id: String, update: ExecutionUpdate) = dbQuery {
+    suspend fun update(id: UUID, update: ExecutionUpdate) = dbQuery {
         ExecutionsTable.update({ ExecutionsTable.id eq id }) {
             update.status?.let { status -> it[ExecutionsTable.status] = status }
             update.executorId?.let { executorId -> it[ExecutionsTable.executorId] = executorId }
@@ -53,9 +58,9 @@ object ExecutionRepository {
     }
 
     private fun ResultRow.toExecutionResponse() = ExecutionResponse(
-        id = this[ExecutionsTable.id],
+        id = this[ExecutionsTable.id].toString(),
         script = this[ExecutionsTable.script],
-        cpuCount = this[ExecutionsTable.cpus],
+        cpus = this[ExecutionsTable.cpus],
         memoryMb = this[ExecutionsTable.memoryMb],
         status = this[ExecutionsTable.status],
         executorId = this[ExecutionsTable.executorId],
@@ -64,9 +69,10 @@ object ExecutionRepository {
         stderr = this[ExecutionsTable.stderr],
         createdAt = this[ExecutionsTable.createdAt].toString(),
         startedAt = this[ExecutionsTable.startedAt]?.toString(),
-        finishedAt = this[ExecutionsTable.finishedAt]?.toString()
+        finishedAt = this[ExecutionsTable.finishedAt]?.toString(),
     )
 
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
+
 }

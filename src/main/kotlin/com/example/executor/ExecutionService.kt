@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.util.UUID
 
 /**
  * Service that manages the execution lifecycle using pluggable executors
@@ -16,7 +17,7 @@ class ExecutionService(
     private val logger = LoggerFactory.getLogger(ExecutionService::class.java)
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    suspend fun createExecution(script: String, cpus: Double, memoryMb: Int): String {
+    suspend fun createExecution(script: String, cpus: Double, memoryMb: Int): UUID {
         val executionId = repository.create(script, cpus, memoryMb)
 
         coroutineScope.launch {
@@ -40,12 +41,16 @@ class ExecutionService(
         return executionId
     }
 
-    suspend fun getExecution(id: String): ExecutionResponse? {
+    suspend fun getExecution(id: UUID): ExecutionResponse? {
         return repository.findById(id)
     }
 
+    suspend fun getAllExecutions(): List<ExecutionResponse> {
+        return repository.findAll()
+    }
+
     private suspend fun executeWithBackend(
-        executionId: String,
+        executionId: UUID,
         script: String,
         cpuCount: Double,
         memoryMb: Int

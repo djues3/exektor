@@ -10,7 +10,5 @@ fun Application.configureHTTP() {
     }
 }
 
-
-fun isProduction() =
-    System.getenv("EXEKTOR_RUNTIME") == "production"
-
+fun Application.isProduction() =
+    environment.config.propertyOrNull("ktor.deployment.environment")?.getString() == "production"

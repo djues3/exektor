@@ -1,5 +1,7 @@
 package com.example.executor
 
+import java.util.UUID
+
 /**
  * Represents the result of a command execution
  */
@@ -24,7 +26,7 @@ interface Executor {
      * @throws Exception if execution fails
      */
     suspend fun execute(
-        executionId: String,
+        executionId: UUID,
         script: String,
         cpus: Double,
         memoryMb: Int

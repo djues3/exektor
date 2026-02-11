@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class ExecutionResponse(
     val id: String,
     val script: String,
-    val cpuCount: Double,
+    val cpus: Double,
     val memoryMb: Int,
     val status: ExecutionStatus,
     val executorId: String? = null,

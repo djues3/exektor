@@ -4,7 +4,7 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.timestamp
 
 object ExecutionsTable : Table("executions") {
-    val id = varchar("id", 36)
+    val id = uuid("id")
     val script = text("script")
     val cpus = double("cpus")
     val memoryMb = integer("memory_mb")

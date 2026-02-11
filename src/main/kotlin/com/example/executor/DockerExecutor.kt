@@ -12,6 +12,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
+import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -28,7 +29,7 @@ class DockerExecutor(
     private val dockerClient = DockerClientProvider.client
 
     override suspend fun execute(
-        executionId: String,
+        executionId: UUID,
         script: String,
         cpus: Double,
         memoryMb: Int
