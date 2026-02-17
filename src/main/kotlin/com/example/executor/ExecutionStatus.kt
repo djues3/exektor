@@ -5,5 +5,6 @@ enum class ExecutionStatus {
     QUEUED,
     RUNNING,
     FINISHED,
-    FAILED
+    FAILED,
+    TIMED_OUT
 }

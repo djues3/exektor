@@ -9,6 +9,7 @@ import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.respond
+import io.ktor.server.sse.SSE
 import kotlinx.serialization.json.Json
 
 fun main(args: Array<String>) {
@@ -25,6 +26,9 @@ fun Application.module() {
             explicitNulls = false
         })
     }
+
+    install(SSE)
+
     install(CallLogging)
     install(Authentication) {
         val expectedApiKey =
