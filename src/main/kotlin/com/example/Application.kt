@@ -1,15 +1,15 @@
 package com.example
 
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.apikey.apiKey
-import io.ktor.server.netty.EngineMain
-import io.ktor.server.plugins.calllogging.CallLogging
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.response.respond
-import io.ktor.server.sse.SSE
+import io.ktor.server.auth.*
+import io.ktor.server.auth.apikey.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.response.*
+import io.ktor.server.sse.*
 import kotlinx.serialization.json.Json
 
 fun main(args: Array<String>) {
@@ -17,7 +17,8 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    val dockerHost = environment.config.propertyOrNull("exektor.docker.host")?.getString()
+    val dockerHost =
+        System.getenv("EXEKTOR_DOCKER_HOST") ?: environment.config.propertyOrNull("exektor.docker.host")?.getString()
     DockerClientProvider.initialize(dockerHost)
 
     install(ContentNegotiation) {
@@ -33,8 +34,7 @@ fun Application.module() {
     install(Authentication) {
         val expectedApiKey =
             System.getenv("EXEKTOR_API_KEY") ?: this@module.environment.config.propertyOrNull("exektor.api.key")
-                ?.getString()
-            ?: error("Missing api key configuration")
+                ?.getString() ?: error("Missing api key configuration")
 
         data class AppPrincipal(val key: String)
 
