@@ -1,5 +1,25 @@
 # exektor
 
+Exektor is a simple backend service that allows executing shell commands on a remote executor.
+It has an API which supports starting jobs, retrieving their status, and retrieving their output via SSE.
+The only executor supported right now is Docker (and only with a single daemon).
+It uses `docker-java` to communicate with the Docker daemon. `docker-java` does not support using SSH for communication,
+so either TCP or Unix sockets are required. 
+
+The API is available at the [following URL](https://executor.djues3.com) but it
+requires an API key.
+
+## Testing
+There are no tests written yet. The reason being that I could not find a way to test this that doesn't require access to
+the DOcker daemon and is then effectively an E2E test. For such a simple project I see no reason to write E2E tests when
+manual testing is enough for a project of this size. 
+
+I _could_ test the `ExecutionService` class using a mock `Executor` but I feel like
+that would effectively be testing `Kotlinx.*` instead of my own logic since it's that simple. 
+
+
+---- 
+
 This project was created using the [Ktor Project Generator](https://start.ktor.io).
 
 Here are some useful links to get you started:
