@@ -22,6 +22,15 @@ kotlin {
     jvmToolchain(25)
 }
 
+ktor {
+    docker {
+        jreVersion = JavaVersion.VERSION_25
+        localImageName = "exektor"
+        imageTag = "0.0.1"
+        portMappings = listOf()
+    }
+}
+
 dependencies {
     implementation("io.ktor:ktor-server-forwarded-header")
     implementation("io.ktor:ktor-server-core")
